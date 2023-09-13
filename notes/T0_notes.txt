@@ -1,0 +1,54 @@
+Lily Gullett
+
+8/19/2023
+Scans all in white light.
+2023_APAL_1:
+61 minutes
+1,900
+** Sun "set" during the scan, could affect the results since it got darker throughout. Also, had to turn off the flow sicne the ripples were obvious, could chnage results as well.
+2023_APAL_2:
+81 minutes
+2,300
+2023_APAL_3:
+88 minutes
+2,300
+
+Untrained eye count time:
+2h19m
+
+8/21/2023 8:15am
+The orthomosaic for 2023_APAL_1 came out patchy with clear areas and out of focus areas which we want to reduce going forward. My thoughts on that is purging some photos that are out of focus however I don't know how that would affect the finished product as far as matching up points go. Could be worth a shot this week though. 
+
+There are way too many photos taken and it isn't very efficient so trying to find a happy medium of photos could be a good idea. I currently take about 9 photos of each plug but maybe trying to bring that down to 4 (each corner of the rack beneath it) or 5 (each corner of the rack beneath it and shifting for one in the middle for a direct photo of the plug). The orthomosaic is what matters so as long as that generates well the dense point cloud doesn't have to be perfect or as good as it was with 1,900 or 2,300 photos. 
+
+I began dense point cloud generation for 2023_APAL_2.
+
+Can't open model in viscore?
+
+
+8/22/2023 8:38am
+
+Dense point cloud for 2023_APAL_3 came out with some wonky points likely due to the fact that they're being matched wrong. 
+Fixes? Maybe backing up so it has more points of reference instead of one plug main focus. 
+
+Comparing it to the dense point cloud of the no macro top down view with recruits with Celia. Total time and # photos for water level no macro was 21 minutes and 591 photos
+
+8/22/2023 11:32am
+
+Did macro from middle of the water instead of top or close. 812 photos 28 minutes. 
+
+Took 44 individual photos as well to look at in taglab. Would take 10-15 minutes to put each into taglab individually. TagLab isn't showing numbers in the mm scale but they may export with them. Try that and increasing by factor of 10.
+
+8/22/2023 2:56pm
+
+The factor of ten increase allows for more precise measurements, however exporting will be a pain since each map aka each plug would have to be exported. 
+
+8/23/2023 8:45am
+
+Talk to ian about reaching out to taglab makers and seeing if expoering tiny area numbers since even with the big map the areas will be small and might have to be increased by a factor of ten to get precise data. - can talk to ian w questions
+
+Took white balance scan, ~1150 photos, 40 minutes. processing imagery.
+
+8/24/2023 8:52am
+
+White balance ortho doesn't make pink much easier to see. We are making changes, white balance from waterproof paper, closer to side of raceway with added feet, and a little further away than T0 for less photos.
