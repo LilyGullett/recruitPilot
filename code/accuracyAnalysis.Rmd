@@ -1,0 +1,148 @@
+title: "Accuracy Analysis"
+author: "Lily Gullett -- lilysgullett@outlook.com"
+output:
+  html_document:
+    theme: flatly
+    code_folding: show
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_doctument:
+      toc: yes
+      toc_depth: 3
+---
+```{r, setup, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, fig.align = 'left')
+knitr::opts_knit$set(root.dir = "../data")
+options(width = 88)
+library(magrittr)
+```
+
+
+
+
+
+### version: `r Sys.Date() %>% format(format="%B %d, %Y")`
+
+<!-- this is where the DOI would go  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3675991.svg)](https://doi.org/10.5281/zenodo.3675991)
+-->
+
+
+#### [GitHub repository](https://github.com/LilyGullett/recruitPilot){target="_blank"}
+###
+
+***
+This is the working analysis pipeline to analyze data generated from the recruit pilot study manual inventories and TagLab segmentation and assess differences in the inventory counts between trained and untrained eyes as well as between TagLab segmentation and manual inventory. 
+
+***
+
+### All analyses performed with R version `r getRversion()`
+
+
+# Basic setup of R environment
+***
+## Loading required packages
+For the following analyses we will require the use of a number of different R packages. Most of which can be sourced from CRAN, but some must be downloaded from GitHub. We can use the following code to load in the packages and install any packages not previously installed in the R console. 
+
+
+```{r,packages, include = TRUE, message = FALSE, warning = FALSE, results = 'hide'}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanion", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle")
+
+```
+
+#Loading data
+***
+I am loading data in from .xlsx since google drive has been giving me trouble
+
+```{r, load data, include = TRUE, results='hide'}
+
+plugData <- read_csv("../data/plugs/plugData.csv", show_col_types = FALSE)
+
+
+head(plugData)
+
+```
+#Adding Columns
+***
+I'm adding columns that compare the counts between the trained eye, untrained eye, and TagLab segmentation.
+
+```{r, add columns, include = TRUE}
+
+#Adding columns that contain the absolute value of the difference between the trained eye counts and untrained eye counts, trained eye counts and taglab segmentation counts, and untrained eye counts and taglab segmentation counts
+plugData1 <- plugData %>%
+  mutate(
+    trainedVsUntrained = abs(trainedEyeCounts - untrainedEyeCounts),
+    trainedVsTaglab = abs(trainedEyeCounts - taglabCount), 
+    untrainedVsTaglab = abs(untrainedEyeCounts - taglabCount )
+  )
+
+#Outputs the head of the data to see if it added correctly
+head(plugData1)
+
+
+```
+
+#Playing around with R
+***
+I'm taking some time to work with my data and see what I can do with it
+
+```{r, playground, include=TRUE}
+
+#Graph showing the scan time vs the days post settlement
+practicePlot <- plot(plugData$daysPostSettlement, plugData$scanTime, col = plugData$rackColor, pch = 16)
+
+practicePlot
+
+
+
+head(plugData)
+
+
+practicePlot <- ggplot(plugData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
+  facet_grid(.~rackNumber, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
+    ggtitle("Photos Taken Per Timepoint") +
+    theme_bw()
+
+practicePlot
+
+```
+
+
+# Importing Data
+***
+## We are downloading this dataset from our GoogleDrive folder. We will be using the package `googledrive`. Each GoogleDrive file has a unique ID that does not change throughout the lifespan of the document, even if the file name is changed. This ID is housed in the file's URL. 
+Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Below you will copy and paste that into the function `drive_download` within `as_id`. This will save the file locally in the specified path (in this case our data folder) and you will import the folder as you normally would. Downloading it this way decreases the potential human error when downloading, moving folders, renaming, saving etc and ensures that the most up to date file is being utilized. 
+
+# Here we are importing data for D. lab from google drive
+
+```{r, dlLoadingData, include = TRUE}
+drive_auth <- function(email = gargle::gargle_oauth_email(),
+                       path = NULL,
+                       scopes = "https://www.googleapis.com/auth/drive",
+                       cache = gargle::gargle_oauth_cache(),
+                       use_oob = gargle::gargle_oob_default(),
+                       token = NULL) { ... }
+
+
+testDf <- googledrive::drive_download(
+ as_id("1xyLtNN61HYvXYIhD-B4Eca8BPCuEwTftA4936MfwM-w"),
+   path = "../data/plugDataset.xlsx", 
+   overwrite = TRUE,
+ options(googledrive_quiet = TRUE))
+
+#plugData <- read_excel("../data/plugDataset.xlsx", sheet = 6)
+
+#plugData
+
+drive_download(
+  file,
+  path = NULL,
+  type = NULL,
+  overwrite = FALSE,
+  verbose = deprecated()
+)
+
+```
+
+

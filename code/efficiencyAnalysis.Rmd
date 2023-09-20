@@ -29,7 +29,7 @@ library(magrittr)
 -->
 
 
-#### [GitHub repository](https://github.com/icombs2017/fragGrowthExperiment.git){target="_blank"}
+#### [GitHub repository](https://github.com/LilyGullett/recruitPilot){target="_blank"}
 ###
 
 ***
@@ -52,6 +52,50 @@ pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "strin
 
 ```
 
+#Loading data
+***
+I am loading data in from .xlsx since google drive has been giving me trouble
+
+```{r, load data, include = TRUE, results='hide'}
+
+timeData <- read_csv("../data/time/timeData.csv", show_col_types = FALSE)
+
+
+head(timeData)
+
+```
+
+#Playing around with R
+***
+I'm taking some time to work with my data and see what I can do with it
+
+```{r, playground, include=TRUE}
+
+timeData$rackColor[timeData$rackNumber == '1'] <- "pink"
+timeData$rackColor[timeData$rackNumber == '2'] <- "purple"
+timeData$rackColor[timeData$rackNumber == '3'] <- "green"
+#practiceGraph <- ggplot(data = timeData, aes(x = daysPostSettlement, y = scanTime))
+practicePlot <- plot(timeData$daysPostSettlement, timeData$scanTime, col = timeData$rackColor, pch = 16)
+
+practicePlot
+
+head(timeData)
+
+practicePlot <- ggplot() + geom_boxplot(data=timeData, aes(x=timePoint, y=numberPhotos)) +
+    xlab("Timepoint") + ylab("Number of Photos Taken") +
+    ggtitle("Photos Taken Per Timepoint") +
+    theme_bw()
+
+practicePlot
+
+practicePlot <- ggplot(timeData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
+  facet_grid(.~rackNumber, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
+    ggtitle("Photos Taken Per Rack Per Timepoint") +
+    theme_bw()
+ggsave("../figures/practicePhotoPerTimepoint.png", plot = practicePlot, width = 15, height = 10, units = "in", dpi = 600)
+practicePlot
+
+```
 
 # Importing Data
 ***
