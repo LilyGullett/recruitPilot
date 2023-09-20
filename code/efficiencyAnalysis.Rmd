@@ -48,52 +48,96 @@ For the following analyses we will require the use of a number of different R pa
 
 ```{r,packages, include = TRUE, message = FALSE, warning = FALSE, results = 'hide'}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanion", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle")
+pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanionf", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle", "httpuv")
 
 ```
 
 #Loading data
 ***
-I am loading data in from .xlsx since google drive has been giving me trouble
+## I am loading data in from .xlsx since google drive has been giving me trouble
 
 ```{r, load data, include = TRUE, results='hide'}
 
-timeData <- read_csv("../data/time/timeData.csv", show_col_types = FALSE)
+timeData <- read_csv("../data/timeData.csv", show_col_types = FALSE)
 
 
 head(timeData)
 
 ```
 
-#Playing around with R
+# Graphing the photos taken at each timepoint
 ***
-I'm taking some time to work with my data and see what I can do with it
+## I added rack colors to the data in order to make them easily distinguishable. After that I created a graph which plots the number of photos taken at each timepoint separated by rack.
 
-```{r, playground, include=TRUE}
-
+```{r, graphing, include=TRUE}
+#Adding rack colors, green being for the mixed batch of plugs. 
 timeData$rackColor[timeData$rackNumber == '1'] <- "pink"
 timeData$rackColor[timeData$rackNumber == '2'] <- "purple"
 timeData$rackColor[timeData$rackNumber == '3'] <- "green"
-#practiceGraph <- ggplot(data = timeData, aes(x = daysPostSettlement, y = scanTime))
+
+#Plot that compares number of photos per rack over the days post-settlement which shows the new colors 
 practicePlot <- plot(timeData$daysPostSettlement, timeData$scanTime, col = timeData$rackColor, pch = 16)
-
 practicePlot
 
-head(timeData)
-
-practicePlot <- ggplot() + geom_boxplot(data=timeData, aes(x=timePoint, y=numberPhotos)) +
-    xlab("Timepoint") + ylab("Number of Photos Taken") +
-    ggtitle("Photos Taken Per Timepoint") +
-    theme_bw()
-
-practicePlot
 
 practicePlot <- ggplot(timeData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
   facet_grid(.~rackNumber, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
     ggtitle("Photos Taken Per Rack Per Timepoint") +
     theme_bw()
-ggsave("../figures/practicePhotoPerTimepoint.png", plot = practicePlot, width = 15, height = 10, units = "in", dpi = 600)
+#ggsave("../figures/practicePhotoPerTimepoint.png", plot = practicePlot, width = 15, height = 10, units = "in", dpi = 600)
 practicePlot
+
+```
+#Creating new columns
+***
+## Creating columns that compare the differences in time taken between trained eye physical inventory, untrained eye physical inventory, and scans.
+
+```{r, adding columns, include = TRUE}
+
+#Adding columns that contain the absolute value of the difference between the trained eye count time and untrained eye count time, trained eye count time and scan time counts, and untrained eye count time and scan time
+timeData1 <- timeData %>%
+  mutate(
+    trainedVsUntrained = abs(trainedEyeTime - untrainedEyeTime),
+    trainedVsScan = abs(trainedEyeTime - scanTime), 
+    untrainedVsScan = abs(untrainedEyeTime - scanTime )
+  ) %>% 
+  mutate(var(9), as.factor)
+
+timeData1$rackColor <- as.factor(timeData1$rackColor)
+
+#Outputs the head of the data to see if it added correctly
+head(timeData1)
+
+```
+# Graphing the 
+***
+## I created a graph which plots 
+
+```{r, graphing, include=TRUE}
+
+#melting the dataframe into long format to plot all
+timeData2 <- reshape2::melt(data = timeData, c(1,2,3,4,8,9), variable.name = "type", value.name = "time" )
+
+#Plotting the different methods by timepoint and time taken each rack
+practicePlot <- ggplot(timeData2, aes(x = timePoint, y = time, color = rackNumber))+
+  geom_point()+
+  facet_grid(.~type, scales = 'free')+ 
+    xlab("Timepoint") + ylab("Time (Minutes)") +
+    ggtitle("Time per Method") 
+  
+practicePlot
+
+practicePlotColor <- ggplot(timeData2, aes(x = timePoint, y = time, color = as.factor(rackColor)))+
+  geom_point() + 
+
+  facet_grid(.~type, scales = 'free')+ 
+  scale_fill_manual(name="Rack Color",labels=c('Pink', 'Purple', 'Alternating'),values = c("pink","#9FA0FF", "green")) + 
+    xlab("Timepoint") + ylab("Time (Minutes)") +
+    ggtitle("Time per Method") 
+
+
+#ggsave("../figures/practicePhotoPerTimepoint.png", plot = practicePlot, width = 15, height = 10, units = "in", dpi = 600)
+practicePlotColor
 
 ```
 
@@ -113,7 +157,7 @@ drive_auth <- function(email = gargle::gargle_oauth_email(),
                        token = NULL) { ... }
 
 
- drive_download(
+ data <- drive_download(
  as_id("1xyLtNN61HYvXYIhD-B4Eca8BPCuEwTftA4936MfwM-w"),
    path = "../data/timeDataset.xlsx", 
    overwrite = TRUE)

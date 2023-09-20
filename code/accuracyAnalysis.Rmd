@@ -57,7 +57,7 @@ I am loading data in from .xlsx since google drive has been giving me trouble
 
 ```{r, load data, include = TRUE, results='hide'}
 
-plugData <- read_csv("../data/plugs/plugData.csv", show_col_types = FALSE)
+plugData <- read_csv("../data/plugData.csv", show_col_types = FALSE)
 
 
 head(plugData)
