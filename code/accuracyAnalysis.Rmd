@@ -51,18 +51,36 @@ pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "strin
 
 ```
 
-#Loading data
+
+# Importing Data
 ***
-I am loading data in from .xlsx since google drive has been giving me trouble
+## We are downloading this dataset from our GoogleDrive folder. We will be using the package `googledrive`. Each GoogleDrive file has a unique ID that does not change throughout the lifespan of the document, even if the file name is changed. This ID is housed in the file's URL. 
+Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Below you will copy and paste that into the function `drive_download` within `as_id`. This will save the file locally in the specified path (in this case our data folder) and you will import the folder as you normally would. Downloading it this way decreases the potential human error when downloading, moving folders, renaming, saving etc and ensures that the most up to date file is being utilized. 
 
-```{r, load data, include = TRUE, results='hide'}
+# Here we are importing data for D. lab from google drive
 
-plugData <- read_csv("../data/plugData.csv", show_col_types = FALSE)
+```{r, dlLoadingData, include = TRUE}
+drive_auth <- function(email = gargle::gargle_oauth_email(),
+                       path = NULL,
+                       scopes = "https://www.googleapis.com/auth/drive",
+                       cache = gargle::gargle_oauth_cache(),
+                       use_oob = gargle::gargle_oob_default(),
+                       token = NULL) { ... }
 
+
+ data <- drive_download(
+ as_id("1xyLtNN61HYvXYIhD-B4Eca8BPCuEwTftA4936MfwM-w"),
+   path = "../data/recruitDataset.xlsx", 
+   overwrite = TRUE)
+
+plugData <- read_excel("../data/recruitDataset.xlsx", sheet = 3)
 
 head(plugData)
 
+
 ```
+
+
 #Adding Columns
 ***
 I'm adding columns that compare the counts between the trained eye, untrained eye, and TagLab segmentation.
@@ -90,17 +108,17 @@ I'm taking some time to work with my data and see what I can do with it
 ```{r, playground, include=TRUE}
 
 #Graph showing the scan time vs the days post settlement
-practicePlot <- plot(plugData$daysPostSettlement, plugData$scanTime, col = plugData$rackColor, pch = 16)
+#practicePlot <- plot(plugData$daysPostSettlement, plugData$scanTime, col = plugData$rackColor, pch = 16)
 
-practicePlot
+#practicePlot
 
 
 
-head(plugData)
+#head(plugData)
 
 
 practicePlot <- ggplot(plugData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
-  facet_grid(.~rackNumber, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
     ggtitle("Photos Taken Per Timepoint") +
     theme_bw()
 
