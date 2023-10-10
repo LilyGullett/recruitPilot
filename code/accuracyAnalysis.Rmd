@@ -75,6 +75,9 @@ drive_auth <- function(email = gargle::gargle_oauth_email(),
 
 plugData <- read_excel("../data/recruitDataset.xlsx", sheet = 3)
 
+#Changing columns to factors
+plugData <- plugData %>% mutate_at(c('timepoint', 'rack', 'plug', 'color'), as.factor)
+
 head(plugData)
 
 
@@ -101,8 +104,9 @@ plugData1 <- plugData %>%
   ) %>% 
   mutate()
 
-# Creating absolute error 
 
+
+#Creating absolute error (the absolute error per plug between trained, untrained, and taglab counts)
 absoluteError <- plugData1 %>% 
   select(timepoint, rack, color, plug, trainedVsTaglabAbs) %>% 
   group_by(timepoint, rack) %>% 
