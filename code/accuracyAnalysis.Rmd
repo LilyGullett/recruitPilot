@@ -57,9 +57,9 @@ pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "strin
 ## We are downloading this dataset from our GoogleDrive folder. We will be using the package `googledrive`. Each GoogleDrive file has a unique ID that does not change throughout the lifespan of the document, even if the file name is changed. This ID is housed in the file's URL. 
 Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Below you will copy and paste that into the function `drive_download` within `as_id`. This will save the file locally in the specified path (in this case our data folder) and you will import the folder as you normally would. Downloading it this way decreases the potential human error when downloading, moving folders, renaming, saving etc and ensures that the most up to date file is being utilized. 
 
-# Here we are importing data for D. lab from google drive
+# Here we are importing data for our plug counts from google drive
 
-```{r, dlLoadingData, include = TRUE}
+```{r, plugLoadingData, include = TRUE}
 drive_auth <- function(email = gargle::gargle_oauth_email(),
                        path = NULL,
                        scopes = "https://www.googleapis.com/auth/drive",
@@ -85,15 +85,29 @@ head(plugData)
 ***
 I'm adding columns that compare the counts between the trained eye, untrained eye, and TagLab segmentation.
 
-```{r, add columns, include = TRUE}
+```{r, addColumns, include = TRUE}
 
 #Adding columns that contain the absolute value of the difference between the trained eye counts and untrained eye counts, trained eye counts and taglab segmentation counts, and untrained eye counts and taglab segmentation counts
 plugData1 <- plugData %>%
+  select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount, taglabCount) %>% 
+  group_by(timepoint, color, plug) %>% 
   mutate(
-    trainedVsUntrained = abs(trainedEyeCounts - untrainedEyeCounts),
-    trainedVsTaglab = abs(trainedEyeCounts - taglabCount), 
-    untrainedVsTaglab = abs(untrainedEyeCounts - taglabCount )
-  )
+    trainedVsUntrainedAbs = abs(trainedEyeCount - untrainedEyeCount),
+    trainedVsTaglabAbs = abs(trainedEyeCount - taglabCount), 
+    untrainedVsTaglabAbs = abs(untrainedEyeCount - taglabCount ),
+    trainedVsUntrained = (trainedEyeCount - untrainedEyeCount),
+    trainedVsTaglab = (trainedEyeCount - taglabCount), 
+    untrainedVsTaglab = (untrainedEyeCount - taglabCount)
+  ) %>% 
+  mutate()
+
+# Creating absolute error 
+
+absoluteError <- plugData1 %>% 
+  select(timepoint, rack, color, plug, trainedVsTaglabAbs) %>% 
+  group_by(timepoint, rack) %>% 
+  summarise(absError = sum(trainedVsTaglabAbs))
+
 
 #Outputs the head of the data to see if it added correctly
 head(plugData1)
@@ -127,39 +141,13 @@ practicePlot
 ```
 
 
-# Importing Data
+# Analyzing data
 ***
-## We are downloading this dataset from our GoogleDrive folder. We will be using the package `googledrive`. Each GoogleDrive file has a unique ID that does not change throughout the lifespan of the document, even if the file name is changed. This ID is housed in the file's URL. 
-Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Below you will copy and paste that into the function `drive_download` within `as_id`. This will save the file locally in the specified path (in this case our data folder) and you will import the folder as you normally would. Downloading it this way decreases the potential human error when downloading, moving folders, renaming, saving etc and ensures that the most up to date file is being utilized. 
-
-# Here we are importing data for D. lab from google drive
-
-```{r, dlLoadingData, include = TRUE}
-drive_auth <- function(email = gargle::gargle_oauth_email(),
-                       path = NULL,
-                       scopes = "https://www.googleapis.com/auth/drive",
-                       cache = gargle::gargle_oauth_cache(),
-                       use_oob = gargle::gargle_oob_default(),
-                       token = NULL) { ... }
+## We are going to be determining if the counts from the untrained eye inventory and the Taglab segmentation inventory are significantly different from the trained eye counts using each plug as a replicate and between the three racks.
 
 
-testDf <- googledrive::drive_download(
- as_id("1xyLtNN61HYvXYIhD-B4Eca8BPCuEwTftA4936MfwM-w"),
-   path = "../data/plugDataset.xlsx", 
-   overwrite = TRUE,
- options(googledrive_quiet = TRUE))
+```{r, perPlugAccuracy, include = TRUE}
 
-#plugData <- read_excel("../data/plugDataset.xlsx", sheet = 6)
-
-#plugData
-
-drive_download(
-  file,
-  path = NULL,
-  type = NULL,
-  overwrite = FALSE,
-  verbose = deprecated()
-)
 
 ```
 
