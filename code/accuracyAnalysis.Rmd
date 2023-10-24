@@ -47,7 +47,7 @@ For the following analyses we will require the use of a number of different R pa
 
 ```{r,packages, include = TRUE, message = FALSE, warning = FALSE, results = 'hide'}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanion", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle")
+pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanion", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle", "FSA", "vegan")
 
 ```
 
@@ -60,12 +60,12 @@ Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Be
 # Here we are importing data for our plug counts from google drive
 
 ```{r, plugLoadingData, include = TRUE}
-drive_auth <- function(email = gargle::gargle_oauth_email(),
-                       path = NULL,
-                       scopes = "https://www.googleapis.com/auth/drive",
-                       cache = gargle::gargle_oauth_cache(),
-                       use_oob = gargle::gargle_oob_default(),
-                       token = NULL) { ... }
+# drive_auth <- function(email = gargle::gargle_oauth_email(),
+#                        path = NULL,
+#                        scopes = "https://www.googleapis.com/auth/drive",
+#                        cache = gargle::gargle_oauth_cache(),
+#                        use_oob = gargle::gargle_oob_default(),
+#                        token = NULL) { ... }
 
 
  data <- drive_download(
@@ -102,15 +102,7 @@ plugData1 <- plugData %>%
     trainedVsTaglab = (trainedEyeCount - taglabCount), 
     untrainedVsTaglab = (untrainedEyeCount - taglabCount)
   ) %>% 
-  mutate()
-
-
-
-#Creating absolute error (the absolute error per plug between trained, untrained, and taglab counts)
-absoluteError <- plugData1 %>% 
-  select(timepoint, rack, color, plug, trainedVsTaglabAbs) %>% 
-  group_by(timepoint, rack) %>% 
-  summarise(absError = sum(trainedVsTaglabAbs))
+  na.omit()
 
 
 #Outputs the head of the data to see if it added correctly
@@ -146,6 +138,71 @@ plugData2
 
 
 ```{r, perPlugAccuracy, include = TRUE}
+# tVu <- plugData1 %>% 
+#   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount) %>% 
+#   pivot_longer(cols = trainedEyeCount:untrainedEyeCount,
+#                names_to = "type",
+#                values_to = "counts") %>% 
+#   mutate_at(c('type'), as.factor)
+
+#   
+# t.test(counts ~ type, data = tVu)
+
+
+
+
+aovDataCounts <- plugData1 %>% 
+  select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount, taglabCount) %>% 
+  pivot_longer(cols = trainedEyeCount:taglabCount,
+               names_to = 'type', 
+               values_to = 'counts') %>% 
+mutate_at(c('type'), as.factor)
+
+
+# hist makes a histogram, shapiro-wilk test is a normality test
+hist(aovDataCounts$counts)
+shapiro.test(aovDataCounts$counts)
+hist(log(aovDataCounts$counts))
+shapiro.test(sqrt(aovDataCounts$counts))
+
+# anovaCounts <- aov(counts ~ type*color, data = aovDataCounts)
+# summary(anovaCounts)
+
+kruskal.test(counts~type, data = aovDataCounts)
+
+
+
+aovDataError <- plugData1 %>% 
+  select(timepoint, rack, plug, color, trainedVsUntrainedAbs, trainedVsTaglabAbs, untrainedVsTaglabAbs) %>% 
+  pivot_longer(cols = trainedVsUntrainedAbs:untrainedVsTaglabAbs,
+               names_to = 'type', 
+               values_to = 'error') %>% 
+mutate_at(c('type'), as.factor)
+
+
+
+
+# hist makes a histogram, shapiro-wilk test is a normality test
+hist(aovDataError$error)
+shapiro.test(aovDataError$error)
+
+
+# hist(log(aovDataError$error))
+# shapiro.test(sqrt(aovDataError$error))
+
+
+
+# anovaError <- aov(error ~ type*color, data = aovDataError)
+# summary(anovaError)
+
+errorKW <- kruskal.test(error~type, data = aovDataError)
+
+errorDunn <- dunnTest(x = aovDataError$error, g = aovDataError$type, method = 'bonferroni') 
+
+
+adonis2(counts ~ type*timepoint*rack*color, data = aovDataCounts, permutations = 9999)
+
+
 
 
 ```
