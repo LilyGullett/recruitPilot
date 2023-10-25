@@ -95,12 +95,12 @@ practicePlot
 
 
 scanPlot <- ggplot(timeData, aes(x = timepoint, y = scanTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
-  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint") + ylab("Time Taken (minutes)") +
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
     ggtitle("Scan Time Per Rack Per Timepoint") +
     theme_bw()
 scanPlot <- scanPlot+theme(
     axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
-    axis.title.x = element_blank(),
+    axis.title.x = element_text(size = 30, face = "bold"), 
     axis.title.y = element_text(size = 30, face = "bold"), 
     axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
     legend.title = element_text(size = 30, face = "bold"), 
@@ -115,13 +115,13 @@ scanPlot <- scanPlot+theme(
 ggsave("../figures/scanTimePerTimepoint.png", plot = scanPlot, width = 15, height = 10, units = "in", dpi = 600)
 scanPlot
 
-trainedPlot <- ggplot(timeData, aes(x = timepoint, y = scanTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
-  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint") + ylab("Time Taken (minutes)") +
+trainedPlot <- ggplot(timeData, aes(x = timepoint, y = trainedEyeTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
     ggtitle("Trained Eye Inventory Time Per Rack Per Timepoint") +
     theme_bw()
 trainedPlot <- trainedPlot+theme(
     axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
-    axis.title.x = element_blank(),
+    axis.title.x = element_text(size = 30, face = "bold"),
     axis.title.y = element_text(size = 30, face = "bold"), 
     axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
     legend.title = element_text(size = 30, face = "bold"), 
@@ -135,7 +135,26 @@ trainedPlot <- trainedPlot+theme(
     legend.position = "right")
 ggsave("../figures/trainedTimePerTimepoint.png", plot = trainedPlot, width = 15, height = 10, units = "in", dpi = 600)
 
-
+#The code for the untrained eye time per rack per timepoint
+untrainedPlot <- ggplot(timeData, aes(x = timepoint, y = untrainedEyeTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
+    ggtitle("Trained Eye Inventory Time Per Rack Per Timepoint") +
+    theme_bw()
+untrainedPlot <- untrainedPlot+theme(
+    axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
+    axis.title.x = element_text(size = 30, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"), 
+    axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
+    legend.title = element_text(size = 30, face = "bold"), 
+    legend.text = element_text(size = 25, face = "bold", colour = "black"), 
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"),
+    panel.background = element_rect(fill = '#F5F5F5'), 
+    plot.title = element_text(size = 37, face = "bold"), 
+    axis.line = element_line(colour = "black"), 
+    axis.ticks = element_line(color="black"), 
+    text = element_text(size=40, color="black"), 
+    legend.position = "right")
+ggsave("../figures/untrainedTimePerTimepoint.png", plot = untrainedPlot, width = 15, height = 10, units = "in", dpi = 600)
 
 ```
 #Creating new columns
