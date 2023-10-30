@@ -100,8 +100,7 @@ plugData1 <- plugData %>%
     untrainedVsTaglabAbs = abs(untrainedEyeCount - taglabCount ),
     trainedVsUntrained = (trainedEyeCount - untrainedEyeCount),
     trainedVsTaglab = (trainedEyeCount - taglabCount), 
-    untrainedVsTaglab = (untrainedEyeCount - taglabCount)
-  ) %>% 
+    untrainedVsTaglab = (untrainedEyeCount - taglabCount)) %>% 
   na.omit()
 
 
@@ -111,6 +110,33 @@ head(plugData1)
 
 ```
 
+
+THIS IS THE NEW CODE I ADDED
+
+
+
+```{r}
+# this is the code you should be using for the graph... at least i think
+
+plugData1 <- plugData %>% 
+  select(timepoint, rack, plug, trainedEyeCount, untrainedEyeCount, taglabCount) %>% 
+  pivot_longer(cols = trainedEyeCount:taglabCount,
+               names_to = 'type', 
+               values_to = 'count') %>% 
+mutate_at(c('type'), as.factor)
+
+# you need to change your xlab and ylab labels and title below and then add the theme statements from previous graphs and other graph (in the efficiency script)
+
+comparingPlot <- ggplot(plugData1, aes(x = timepoint, y = count)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
+  facet_grid(.~type, scales = 'free_x')+
+  xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
+    ggtitle("Comparing Inventory Types") +
+    theme_bw()
+
+
+
+
+```
 
 
 
