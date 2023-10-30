@@ -111,25 +111,7 @@ head(plugData1)
 
 ```
 
-#Playing around with R
-***
-I'm taking some time to work with my data and see what I can do with it
 
-```{r, playground, include=TRUE}
-#Trying to determine the number of errors per rack per timepoint, in the code below it is for the taglab segmentation vs the trained eye absolute value
-rackErr <- plugData1 %>% 
-  group_by(timepoint, rack) %>%
-  summarise(errorPerRack = sum(trainedVsTaglabAbs))
-rackErr
-
-# practicePlot <- ggplot(plugData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
-#   facet_grid(.~rack, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
-#     ggtitle("Photos Taken Per Timepoint") +
-#     theme_bw()
-# 
-# practicePlot
-
-```
 
 
 # Analyzing data
@@ -224,5 +206,50 @@ adonis2(counts ~ type*timepoint*rack*color, data = aovDataCounts, permutations =
 
 
 ```
+#Graphing
+***
+I am creating graphs to show what we found from our analysis results
 
+```{r, graphing, include=TRUE}
+#Adding the counts together by the type and by timepoint
+# aovDataGraph <- aovDataCounts%>%
+#    select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount, taglabCount) %>%
+#    pivot_longer(cols = trainedEyeCount:taglabCount,
+#                 names_to = "type",
+#                 values_to = "counts") %>%
+#   mutate_at(c('type'), as.factor)
+
+#Adding the counts together by the type and by timepoint
+rackCounts <- plugData1 %>% 
+  group_by(timepoint, rack) %>%
+  summarise(trainedEye = sum(trainedEyeCount)) %>% 
+  summarise(untrainedEye = sum(untrainedEyeCount)) %>% 
+  summarise(taglabCount = sum(taglabCount))
+
+
+#Plotting the counts by type
+dataCounts <- ggplot(aovDataCounts, aes(x = timepoint, y = counts)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
+    ggtitle("Scan Time Per Rack Per Timepoint") +
+    theme_bw()
+
+dataCounts
+scanPlot <- scanPlot+theme(
+    axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
+    axis.title.x = element_text(size = 30, face = "bold"), 
+    axis.title.y = element_text(size = 30, face = "bold"), 
+    axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
+    legend.title = element_text(size = 30, face = "bold"), 
+    legend.text = element_text(size = 25, face = "bold", colour = "black"), 
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"),
+    panel.background = element_rect(fill = '#F5F5F5'), 
+    plot.title = element_text(size = 37, face = "bold"), 
+    axis.line = element_line(colour = "black"), 
+    axis.ticks = element_line(color="black"), 
+    text = element_text(size=40, color="black"), 
+    legend.position = "right")
+ggsave("../figures/scanTimePerTimepoint.png", plot = scanPlot, width = 15, height = 10, units = "in", dpi = 600)
+scanPlot
+
+```
 
