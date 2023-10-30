@@ -125,15 +125,23 @@ plugData1 <- plugData %>%
                values_to = 'count') %>% 
 mutate_at(c('type'), as.factor)
 
+#here is how I have tried to add things in the past. I want to add the time
+typeCount <- plugData %>% 
+  group_by(timepoint,trainedEyeCount) %>%
+  summarise(trainedEye = sum(trainedEyeCount)) %>% 
+  # summarise(untrainedEye = sum(untrainedEyeCount)) %>% 
+  # summarise(taglabCount = sum(taglabCount))
+typeCount
+
 # you need to change your xlab and ylab labels and title below and then add the theme statements from previous graphs and other graph (in the efficiency script)
 
 comparingPlot <- ggplot(plugData1, aes(x = timepoint, y = count)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
-  facet_grid(.~type, scales = 'free_x')+
-  xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
-    ggtitle("Comparing Inventory Types") +
+  facet_grid( scales = 'free_x')+
+  xlab("Timepoint (weeks)") + ylab("Average Number of Recruits per ???") +
+    ggtitle("Comparing Inventory Counts") +
     theme_bw()
 
-
+comparingPlot
 
 
 ```
