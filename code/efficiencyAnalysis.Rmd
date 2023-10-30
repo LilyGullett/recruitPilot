@@ -60,12 +60,12 @@ Example: docs.google.com/spreadsheets/d/FILE_ID_GOES_HERE/other_information/. Be
 # Here we are importing data from google drive
 
 ```{r, LoadingData, include = TRUE}
-drive_auth <- function(email = gargle::gargle_oauth_email(),
-                       path = NULL,
-                       scopes = "https://www.googleapis.com/auth/drive",
-                       cache = gargle::gargle_oauth_cache(),
-                       use_oob = gargle::gargle_oob_default(),
-                       token = NULL) { ... }
+# drive_auth <- function(email = gargle::gargle_oauth_email(),
+#                        path = NULL,
+#                        scopes = "https://www.googleapis.com/auth/drive",
+#                        cache = gargle::gargle_oauth_cache(),
+#                        use_oob = gargle::gargle_oob_default(),
+#                        token = NULL) { ... }
 
 
  data <- drive_download(
@@ -91,15 +91,16 @@ timeData
 
 #Plot that compares number of photos per rack over the days post-settlement which shows the new colors 
 timeData1 <- timeData %>% 
-  select(timepoint, rack, trainedEyeTime, untrainedEyeTime) %>% 
-  pivot_longer(cols = trainedEyeTime:untrainedEyeTime,
+  select(timepoint, rack, trainedEyeTime, untrainedEyeTime, scanTime) %>% 
+  pivot_longer(cols = trainedEyeTime:scanTime,
                names_to = 'type', 
                values_to = 'inventoryTime') %>% 
 mutate_at(c('type'), as.factor)
 
 #Creating a plot with both trained and untrained eye counts on it
 comparingPlot <- ggplot(timeData1, aes(x = timepoint, y = inventoryTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
-  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
+  facet_grid(.~type, scales = 'free_x')+ 
+  xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
     ggtitle("Trained Eye Inventory Time vs Untrained") +
     theme_bw()
 comparingPlot <- comparingPlot+theme(

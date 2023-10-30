@@ -140,13 +140,13 @@ rackErr
 ```{r, perPlugAccuracy, include = TRUE}
 #Using the Welch two sample test to compare the trained eye count to the untrained eye count 
 tVu <- plugData1 %>%
-   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount) %>%
-   pivot_longer(cols = trainedEyeCount:untrainedEyeCount,
+   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount, taglabCount) %>%
+   pivot_longer(cols = trainedEyeCount:taglabCount,
                 names_to = "type",
                 values_to = "counts") %>%
   mutate_at(c('type'), as.factor)
 
-t.test(counts ~ type, data = tVu)
+kruskal.test(counts ~ type, data = tVu)
 
 #Using the Welch two sample test to compare the trained eye count to the taglab count 
 tVu1 <- plugData1 %>%
