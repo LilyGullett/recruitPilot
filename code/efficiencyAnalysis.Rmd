@@ -90,10 +90,37 @@ timeData
 #timeData$rackColor[timeData$rackNumber == '3'] <- "green"
 
 #Plot that compares number of photos per rack over the days post-settlement which shows the new colors 
-practicePlot <- plot(timeData$daysPostSettlement, timeData$scanTime, col = timeData$rackColor, pch = 16)
-practicePlot
+timeData1 <- timeData %>% 
+  select(timepoint, rack, trainedEyeTime, untrainedEyeTime) %>% 
+  pivot_longer(cols = trainedEyeTime:untrainedEyeTime,
+               names_to = 'type', 
+               values_to = 'inventoryTime') %>% 
+mutate_at(c('type'), as.factor)
 
+#Creating a plot with both trained and untrained eye counts on it
+comparingPlot <- ggplot(timeData1, aes(x = timepoint, y = inventoryTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
+  facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
+    ggtitle("Trained Eye Inventory Time vs Untrained") +
+    theme_bw()
+comparingPlot <- comparingPlot+theme(
+    axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
+    axis.title.x = element_text(size = 30, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"), 
+    axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
+    legend.title = element_text(size = 30, face = "bold"), 
+    legend.text = element_text(size = 25, face = "bold", colour = "black"), 
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"),
+    panel.background = element_rect(fill = '#F5F5F5'), 
+    plot.title = element_text(size = 37, face = "bold"), 
+    axis.line = element_line(colour = "black"), 
+    axis.ticks = element_line(color="black"), 
+    text = element_text(size=40, color="black"), 
+    legend.position = "right")
+comparingPlot
 
+ggsave("../figures/trainedVsUntrainedTime.png", plot = comparingPlot, width = 15, height = 10, units = "in", dpi = 600)
+
+#Scan time per timepoint graph
 scanPlot <- ggplot(timeData, aes(x = timepoint, y = scanTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
   facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
     ggtitle("Scan Time Per Rack Per Timepoint") +
@@ -138,7 +165,7 @@ ggsave("../figures/trainedTimePerTimepoint.png", plot = trainedPlot, width = 15,
 #The code for the untrained eye time per rack per timepoint
 untrainedPlot <- ggplot(timeData, aes(x = timepoint, y = untrainedEyeTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
   facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
-    ggtitle("Trained Eye Inventory Time Per Rack Per Timepoint") +
+    ggtitle("Untrained Eye Inventory Time Per Rack Per Timepoint") +
     theme_bw()
 untrainedPlot <- untrainedPlot+theme(
     axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
