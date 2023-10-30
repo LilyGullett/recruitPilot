@@ -48,7 +48,7 @@ For the following analyses we will require the use of a number of different R pa
 ```{r,packages, include = TRUE, message = FALSE, warning = FALSE, results = 'hide'}
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load("ggplot2", "googlesheets4", "dplyr", "officer","reshape2", "stringr", "flextable", "gridExtra", "ggpubr", "Rmisc", "rcompanion", "RColorBrewer", "googledrive", "gdata", "readxl", "DescTools","patchwork", "FSA", "rstatix", "tidyverse", "lme4", 'PMCRMplus', "EnvStats", "emmeans", "MuMIn", "sjstats", "lmerTest", "gargle", "FSA", "vegan")
-
+install.packages("geoR")
 ```
 
 
@@ -116,11 +116,11 @@ head(plugData1)
 I'm taking some time to work with my data and see what I can do with it
 
 ```{r, playground, include=TRUE}
-
-plugData2 <- plugData1 %>% 
+#Trying to determine the number of errors per rack per timepoint, in the code below it is for the taglab segmentation vs the trained eye absolute value
+rackErr <- plugData1 %>% 
   group_by(timepoint, rack) %>%
-  summarise(errorPerRack = sum(untrainedVsTaglabAbs))
-plugData2
+  summarise(errorPerRack = sum(trainedVsTaglabAbs))
+rackErr
 
 # practicePlot <- ggplot(plugData, aes(x = timePoint, y = numberPhotos)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timePoint))+
 #   facet_grid(.~rack, scales = 'free')+ xlab("Timepoint") + ylab("Number of Photos Taken") +
@@ -138,19 +138,28 @@ plugData2
 
 
 ```{r, perPlugAccuracy, include = TRUE}
-# tVu <- plugData1 %>% 
-#   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount) %>% 
-#   pivot_longer(cols = trainedEyeCount:untrainedEyeCount,
-#                names_to = "type",
-#                values_to = "counts") %>% 
-#   mutate_at(c('type'), as.factor)
+#Using the Welch two sample test to compare the trained eye count to the untrained eye count 
+tVu <- plugData1 %>%
+   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount) %>%
+   pivot_longer(cols = trainedEyeCount:untrainedEyeCount,
+                names_to = "type",
+                values_to = "counts") %>%
+  mutate_at(c('type'), as.factor)
 
-#   
-# t.test(counts ~ type, data = tVu)
+t.test(counts ~ type, data = tVu)
+
+#Using the Welch two sample test to compare the trained eye count to the taglab count 
+tVu1 <- plugData1 %>%
+   select(timepoint, rack, plug, color, trainedEyeCount, taglabCount) %>%
+   pivot_longer(cols = trainedEyeCount:taglabCount,
+                names_to = "type",
+                values_to = "counts") %>%
+  mutate_at(c('type'), as.factor)
+
+t.test(counts ~ type, data = tVu1)
 
 
-
-
+#Creating aovDataCounts to have the counts all be combined with their type as factors
 aovDataCounts <- plugData1 %>% 
   select(timepoint, rack, plug, color, trainedEyeCount, untrainedEyeCount, taglabCount) %>% 
   pivot_longer(cols = trainedEyeCount:taglabCount,
@@ -158,20 +167,27 @@ aovDataCounts <- plugData1 %>%
                values_to = 'counts') %>% 
 mutate_at(c('type'), as.factor)
 
-
+#testing the normality of our new counts column
 # hist makes a histogram, shapiro-wilk test is a normality test
 hist(aovDataCounts$counts)
 shapiro.test(aovDataCounts$counts)
-hist(log(aovDataCounts$counts))
+
+
+#trying to transform the data so it has a more normal distribution
+hist(log(aovDataCounts$counts)+ 1)
 shapiro.test(sqrt(aovDataCounts$counts))
 
-# anovaCounts <- aov(counts ~ type*color, data = aovDataCounts)
-# summary(anovaCounts)
+#Trying boxcox transformation, it says im missing a lambda and there isnt a default
+boxcoxTransform(aovDataCounts$counts)
+
+#Anova test for the counts compared to type and color
+anovaCounts <- aov(counts ~ type*color, data = aovDataCounts)
+summary(anovaCounts)
 
 kruskal.test(counts~type, data = aovDataCounts)
 
 
-
+#Creating aovDataError which is the same layout as aovDataCounts but instead of the different counts we are looking at the error between trained eye counts, taglab, and untrained
 aovDataError <- plugData1 %>% 
   select(timepoint, rack, plug, color, trainedVsUntrainedAbs, trainedVsTaglabAbs, untrainedVsTaglabAbs) %>% 
   pivot_longer(cols = trainedVsUntrainedAbs:untrainedVsTaglabAbs,
@@ -181,26 +197,28 @@ mutate_at(c('type'), as.factor)
 
 
 
-
+#Determining if the data is normal
 # hist makes a histogram, shapiro-wilk test is a normality test
 hist(aovDataError$error)
 shapiro.test(aovDataError$error)
 
+#Trying to normalize the data with log and log + 1 and sqrt
+ hist(log(aovDataError$error))
+ 
+ hist(log(aovDataError$error + 1))
+ shapiro.test(sqrt(aovDataError$error))
 
-# hist(log(aovDataError$error))
-# shapiro.test(sqrt(aovDataError$error))
 
-
-
-# anovaError <- aov(error ~ type*color, data = aovDataError)
-# summary(anovaError)
+#Running an anova on the error data by count type (trainedvstaglab) and color
+anovaError <- aov(error ~ type*color, data = aovDataError)
+summary(anovaError)
 
 errorKW <- kruskal.test(error~type, data = aovDataError)
 
 errorDunn <- dunnTest(x = aovDataError$error, g = aovDataError$type, method = 'bonferroni') 
 
-
 adonis2(counts ~ type*timepoint*rack*color, data = aovDataCounts, permutations = 9999)
+
 
 
 
