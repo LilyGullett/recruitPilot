@@ -130,7 +130,17 @@ head (timeData2)
 #kruskal-wallis test for significance between inventory method time
 kruskal.test(inventoryTime ~ type, data = timeData2)
 
-dunn_test(timeData2, inventoryTime~type, "none", TRUE)
+test <- dunn_test(timeData2, inventoryTime~type, "bonferroni", TRUE)
+
+#Average time per inventory type throughout all timepoints except T0
+averageData <- timeData %>% 
+  filter (timepoint != "0") %>%
+  group_by(trainedEyeTime, untrainedEyeTime, scanTime) %>%
+  summarise(trainedEye = ave(trainedEyeTime)) %>% 
+  summarise(untrainedEye = ave(untrainedEyeTime)) %>% 
+  summarise(scan = ave(scanTime))
+  
+
 
 #Scan time per timepoint graph
 scanPlot <- ggplot(timeData, aes(x = timepoint, y = scanTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
