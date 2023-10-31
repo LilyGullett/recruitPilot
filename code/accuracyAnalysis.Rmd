@@ -126,13 +126,13 @@ plugData1 <- plugData %>%
 mutate_at(c('type'), as.factor) %>% 
   na.omit()
 
-#here is how I have tried to add things in the past. I want to add the time
-typeCount <- plugData %>% 
-  group_by(timepoint,trainedEyeCount) %>%
-  summarise(trainedEye = sum(trainedEyeCount)) %>% 
-  # summarise(untrainedEye = sum(untrainedEyeCount)) %>% 
-  # summarise(taglabCount = sum(taglabCount))
-typeCount
+# #here is how I have tried to add things in the past. I want to add the time
+# typeCount <- plugData %>% 
+#   group_by(timepoint,trainedEyeCount) %>%
+#   summarise(trainedEye = sum(trainedEyeCount)) %>% 
+#   # summarise(untrainedEye = sum(untrainedEyeCount)) %>% 
+#   # summarise(taglabCount = sum(taglabCount))
+# typeCount
 
 
 
@@ -144,16 +144,30 @@ totalCount1 <- plugData1 %>%
   dplyr::summarise(avgType = mean(totalRack), .groups = 'keep') %>% 
   droplevels()
 
-# you need to change your xlab and ylab labels and title below and then add the theme statements from previous graphs and other graph (in the efficiency script)
+# Graph comparing the average recruits per rack counts for the different types of inventory over time
 
 comparingPlot <- ggplot(totalCount1, aes(x = timepoint, y = avgType)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
   facet_grid( scales = 'free_x')+
-  xlab("Timepoint (weeks)") + ylab("Average Number of Recruits per ???") +
-    ggtitle("Comparing Inventory Counts") +
+  xlab("Timepoint (weeks)") + ylab("Average Number of Recruits per Rack") +
+    ggtitle("Comparing Inventory Accuracy") +
     theme_bw()
 
 comparingPlot
-
+comparingPlot <- comparingPlot+theme(
+    axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
+    axis.title.x = element_text(size = 30, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"), 
+    axis.text.y = element_text(colour = "black", size = 24, face = "bold"),
+    legend.title = element_text(size = 30, face = "bold"), 
+    legend.text = element_text(size = 25, face = "bold", colour = "black"), 
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"),
+    panel.background = element_rect(fill = '#F5F5F5'), 
+    plot.title = element_text(size = 37, face = "bold"), 
+    axis.line = element_line(colour = "black"), 
+    axis.ticks = element_line(color="black"), 
+    text = element_text(size=40, color="black"), 
+    legend.position = "right")
+ggsave("../figures/typeCountsComparison.png", plot = comparingPlot, width = 15, height = 10, units = "in", dpi = 600)
 
 ```
 

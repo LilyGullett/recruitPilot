@@ -101,7 +101,7 @@ mutate_at(c('type'), as.factor)
 comparingPlot <- ggplot(timeData1, aes(x = timepoint, y = inventoryTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = type))+
   facet_grid(.~type, scales = 'free_x')+ 
   xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
-    ggtitle("Comparing Inventory Types") +
+    ggtitle("Comparing Inventory Efficiency") +
     theme_bw()
 comparingPlot <- comparingPlot+theme(
     axis.text.x = element_text(size = 25, colour = "black", vjust = 0.5, hjust = 0.5, face= "bold"), 
