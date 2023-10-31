@@ -121,6 +121,17 @@ comparingPlot
 
 ggsave("../figures/timeComparison.png", plot = comparingPlot, width = 15, height = 10, units = "in", dpi = 600)
 
+
+#Creating a dataframe with the outliers (T0) removed
+timeData2 <- timeData1 %>%  
+filter (timepoint != "0")
+head (timeData2)
+
+#kruskal-wallis test for significance between inventory method time
+kruskal.test(inventoryTime ~ type, data = timeData2)
+
+dunn_test(timeData2, inventoryTime~type, "none", TRUE)
+
 #Scan time per timepoint graph
 scanPlot <- ggplot(timeData, aes(x = timepoint, y = scanTime)) + geom_bar(position = 'dodge', stat = 'identity', aes(fill = timepoint))+
   facet_grid(.~rack, scales = 'free')+ xlab("Timepoint (weeks)") + ylab("Time Taken (minutes)") +
