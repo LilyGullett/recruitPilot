@@ -1,2 +1,2 @@
 # recruitPilot
-This is a repository for the pilot study attempting to elucidate if small-scale structure from motion photogrammetry can make counting new coral recruits more efficient. 
+This is a repository for the pilot study attempting to elucidate if Structure from Motion photogrammetry can make the inventory of sexually propagated coral recruits more accurate or more efficient. 
