@@ -237,3 +237,25 @@ practicePlotColor <- ggplot(timeData2, aes(x = timePoint, y = time, color = as.f
 practicePlotColor
 
 
+```
+
+```{r}
+
+
+kwTime <- timeData1 %>% 
+  filter(timepoint != "0")
+kruskal.test(inventoryTime ~ type, data = kwTime)
+timeDunn <- dunn_test(kwTime, inventoryTime~type, p.adjust.method = 'bonferroni', detailed = TRUE)
+
+
+
+```
+
+
+
+
+
+
+
+
+
